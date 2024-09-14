@@ -1,39 +1,53 @@
-document.getElementById('getWeather').addEventListener('click', async () => {
-    const location = document.getElementById('location').value;
-    const apiKey = 'YOUR_API_KEY'; // Replace with your OpenWeatherMap API key
-    const apiUrl = https://api.openweathermap.org/data/2.5/forecast?q=${location}&appid=${apiKey}&units=metric;
-
-    try {
-        const response = await fetch(apiUrl);
-        if (!response.ok) {
-            throw new Error('Location not found');
-        }
-        const data = await response.json();
-        displayWeather(data);
-    } catch (error) {
-        document.getElementById('weatherResult').innerHTML = <p>${error.message}</p>;
-    }
-});
-
-function displayWeather(data) {
-    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    let resultHtml = <h2>Weather in ${data.city.name}</h2>;
-
-    days.forEach((day, index) => {
-        const weather = data.list[index * 8]; // 8 data points per day
-        const emoji = getWeatherEmoji(weather.weather[0].main);
-        resultHtml += 
-            <p>${day}: ${Math.round(weather.main.temp)}°C ${emoji}</p>
-        ;
-    });
-
-    document.getElementById('weatherResult').innerHTML = resultHtml;
+function displayTemperature(response) {
+  let temperatureElement = document.querySelector("#current-temperature");
+  let temperature = Math.round(response.data.temperature.current);
+  let cityElement = document.querySelector("#current-city");
+  cityElement.innerHTML = response.data.city;
+  temperatureElement.innerHTML = temperature;
 }
 
-function getWeatherEmoji(weather) {
-    if (weather.includes('Clouds')) return '☁️';
-    if (weather.includes('Rain')) return '🌧️';
-    if (weather.includes('Clear')) return '☀️';
-    if (weather.includes('Snow')) return '❄️';
-    return '🌈';
+function search(event) {
+  event.preventDefault();
+  let searchInputElement = document.querySelector("#search-input");
+  let city = searchInputElement.value;
+
+  let apiKey = "b2a5adcct04b33178913oc335f405433";
+  let apiUrl = `https://api.shecodes.io/weather/v1/current?query=${city}&key=${apiKey}&units=metric`;
+
+  axios.get(apiUrl).then(displayTemperature);
 }
+
+function formatDate(date) {
+  let minutes = date.getMinutes();
+  let hours = date.getHours();
+  let day = date.getDay();
+
+  if (minutes < 10) {
+    minutes = `0${minutes}`;
+  }
+
+  if (hours < 10) {
+    hours = `0${hours}`;
+  }
+
+  let days = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday"
+  ];
+
+  let formattedDay = days[day];
+  return `${formattedDay} ${hours}:${minutes}`;
+}
+
+let searchForm = document.querySelector("#search-form");
+searchForm.addEventListener("submit", search);
+
+let currentDateELement = document.querySelector("#current-date");
+let currentDate = new Date();
+
+currentDateELement.innerHTML = formatDate(currentDate);
